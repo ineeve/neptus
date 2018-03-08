@@ -86,7 +86,7 @@ public class Utils {
      *
      * days hours:minutes:seconds:millis
      * */
-    public static String timeAsStr(long timeMs) {
+    public static String durationAsStr(long timeMs) {
         String fullStr = new SimpleDateFormat("d:h:m:s:S").format(new Date(timeMs));
 
         int daysIndex = fullStr.indexOf(":");

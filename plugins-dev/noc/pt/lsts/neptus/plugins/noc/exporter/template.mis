@@ -1,0 +1,128 @@
+/******************************************************************************/
+// Mission Script Template
+// Version 0
+// 04/12/16
+// MISSION DESCRIPTION:
+/*
+		16th science mission of the JC142 Cruise
+		- MAX DEPTH = 2050m (deepest seabed is expected to be 2100m)
+		- Deck Test for all suitable systems
+		- Dive to 500m and do circles for magnetometer check
+		- Circle stbd ( 5mins) undulating (+/- 10m) then to port (5mins) undulating (+/- 10m) for additional mag cal.
+		- Fast dive to 800m then more gentle until ADCP contact made with bottom
+		- Circle and wait for position offset from the Acoustics or timeout
+		- Start EM2040/Edgetech then run lawnmower survey.
+		- Return to surface potter until we arrive to pick it up.
+		
+Expected timings:
+Dive time [@0.5m/s descent rate, 800 Meters approx.] = 26 minutes MAX [timeout 40min]
+MAX time to be waiting for an acoustic command, navigation box and waiting for acoustic nav corrections = 45 minutes [timeout 90min] 
+Science Mission Run = 16 hours 30 minutes = 990mins [timeout total 1188min]
+Ascent time [@ 0.5m/s ascent rate, 2000 meters approx.] = 67mins MAX [timeout 90min]
+
+Expected dive time = 18hrs 48mins = 1128mins
+Max dive time = 23hrs 28mins = 1408mins
+
+Configs
+Max depth as 2050m,  Abort depth as 2090  
+minimum altitude 60m	safe min alt 190m	
+pitch up / down   0.4,   -0.3   safe 0.6, -0.3
+safe max depth 500 m (for use by the collision avoidance algorithm.
+Gain  0.04 
+Safe control gain of 0.2
+Forward Collision Avoidance is ON. 
+
+ABORT max time		1 days 4 hours					In case of a lot of faffing
+ABORT max dive time 1 days 2 hours 		 
+
+Other configs. CHECK THESE
+Set the collision avoidance as ON
+
+EM2040 ON
+Edgetech OFF
+Cameras OFF
+
+*/
+/******************************************************************************/
+include StandardSegmentMacros_JC142.msi	// Include the standard mission segment macros
+include EMSounderV2.msi //for EM2040 commands
+
+
+/******************************************************************************/
+// GLOBAL CONSTANTS
+GL_MOTOR_CRUISE_POWER =	220 // This is the motor power used for the mission. gives ~ 1.4m/s according to spreadsheet
+GL_SAFE_WAYPOINT = N:23:48.776,W:20:43.213   // Set a safe waypoint for MTE_RunToSafeWayPoint(). This is the same as the end waypoint
+GL_SAFE_DEPTH = 500		// Set a safe depth demand for MTE_RunToSafeWayPoint(). This is shallower than highest seabed
+
+/******************************************************************************/
+// MISSION SPECIFIC CONSTANTS
+// Add other waypoints, timer values, depth, altitude demands as needed.
+
+SURFACE_RUNUP_HEADING_1 = 180.0 // Dive run-up heading in degrees (0-360)[Due South]
+DIVE_POWER = 300	//Give a bit more power for diving
+SCI_ALT = 90
+START_WAYPOINT = ${WP-Start}
+END_WAYPOINT = ${WP-End}
+
+// Waypoints for multibeam survey
+// WPM1 = N:23:48.776,W:20:43.213 // Alt = SCI_ALT
+${WP-Vars}
+
+
+
+/******************************************************************************/
+// MAIN MISSION BODY
+start_mission
+// Calls to required mission segment macros.
+// send take control command(which also sends default setup) - this is needed to set EM2040 time properly
+	when( Start)
+		AuxOutput_0(EMTakeControl);
+
+//Run Deck Test Mission
+TestOnDeck()
+
+//DIVING
+// Send start command to start dive
+StartAndDive( SURFACE_RUNUP_HEADING_1)
+GotoAtDepth(START_WAYPOINT,0:0:15:0,500)				// Go back to The start of line at 500 m. 15 minutes timeout. At cruise power is about 1 km max
+
+//DIVING
+FixedSternPlaneDivePower(0:0:40:0, -4.5, 800, DIVE_POWER)	// Descend to 800m depth with fixed rudder and sternplane(at 300 W). 
+
+//Go to the altitude required for the navigation hold
+//NAVIGATION RESET
+WaitAtAlt(START_WAYPOINT, 0:1:30:0, SCI_ALT) //Wait at 90m altitude for navigation reset
+
+//Turn on EM2040 and Edgetech
+// send take control command(which also sends default setup)
+when( Start)
+		AuxOutput_0(EMTakeControl);
+// Start EM2040 pinging
+	when( Start)
+		AuxOutput_0(EMStartPinging);
+
+// Do science tracks
+// TrackAtAltitude(WPM1,WPM2,0:0:15:0,SCI_ALT) // estimated time (762.6m at 1.15ms) is 12 minutes, allow 3m for contingency, total is: 15mins
+${MAN-LIST}
+
+// Turn off EM2040
+EM2040Shutdown()
+
+CircleFixedRudder(5, 0:0:8:0,-2, DIVE_POWER) // added to pull nose up at end of dive for faster surfacing
+
+FixedSternPlaneAscent(0:1:30:0, 7.0, 50)			// ASCEND to 50 m depth with fixed rudder and sternplane(at 220 W) 
+SurfaceAndPotterToPos(END_WAYPOINT)					// Given fixed rudder for fast ascent. Potters when surfaced. Expected 80 mins 
+
+//
+/******************************************************************************/
+// EMERGENCY MISSION ENDING
+start_termination_exception_1
+	MTE_RunToSafeWayPoint()	
+/******************************************************************************/
+// HOMING SIGNAL LOST ACTION
+start_termination_exception_2
+	MTE_STOP()
+/******************************************************************************/
+end_mission
+
+

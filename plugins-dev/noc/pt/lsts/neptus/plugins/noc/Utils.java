@@ -107,19 +107,24 @@ public class Utils {
     }
 
     public static long calculateDurationMillis(ManeuverLocation p1, ManeuverLocation p2, double speed) {
-        double duration;
+        double distance = calculateDistance(p1, p2);
+        double duration = (distance / speed) * 1000;
+        return (long) MathMiscUtils.round(duration, 0);
+    }
+
+    public static double calculateDistance(ManeuverLocation p1, ManeuverLocation p2) {
+        double distance;
 
         if(p1.getZUnits() != p2.getZUnits())
-            duration =  (p1.getHorizontalDistanceInMeters(p2) / speed) * 1000;
+            distance =  p1.getHorizontalDistanceInMeters(p2);
         else {
             double[] offsets = p1.getOffsetFrom(p2);
             offsets[2] = Math.abs(p2.getZ() - p1.getZ());
 
-            double distance = Math.sqrt(offsets[0] * offsets[0] + offsets[1] * offsets[1] + offsets[2] * offsets[2]);
-            duration = (distance / speed) * 1000;
+            distance = Math.sqrt(offsets[0] * offsets[0] + offsets[1] * offsets[1] + offsets[2] * offsets[2]);
         }
 
-        return (long) MathMiscUtils.round(duration, 0);
+        return (long) MathMiscUtils.round(distance, 0);
     }
 
     public static void main(String[] args) {

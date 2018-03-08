@@ -51,7 +51,7 @@ public class Utils {
      * with 3 decimal places
      * */
     public static String locationAsStr(LocationType loc) {
-        return locationAsStr(loc, 3);
+        return locationAsStr(loc, 5);
     }
 
     /**

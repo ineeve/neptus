@@ -103,14 +103,19 @@ public class Utils {
         return days + " " + hmsms;
     }
 
-    public static double calculateDurationMillis(ManeuverLocation p1, ManeuverLocation p2, double speed) {
+    public static long calculateDurationMillis(ManeuverLocation p1, ManeuverLocation p2, double speed) {
+        double duration;
+
         if(p1.getZUnits() != p2.getZUnits())
-            return (p1.getHorizontalDistanceInMeters(p2) / speed) * 1000;
+            duration =  (p1.getHorizontalDistanceInMeters(p2) / speed) * 1000;
+        else {
+            double[] offsets = p1.getOffsetFrom(p2);
+            offsets[2] = Math.abs(p2.getZ() - p1.getZ());
 
-        double[] offsets = p1.getOffsetFrom(p2);
-        offsets[2] = Math.abs(p2.getZ() - p1.getZ());
+            double distance = Math.sqrt(offsets[0] * offsets[0] + offsets[1] * offsets[1] + offsets[2] * offsets[2]);
+            duration = (distance / speed) * 1000;
+        }
 
-        double distance = Math.sqrt(offsets[0] * offsets[0] + offsets[1] * offsets[1] + offsets[2] * offsets[2]);
-        return (distance / speed) * 1000;
+        return (long) MathMiscUtils.round(duration, 3);
     }
 }

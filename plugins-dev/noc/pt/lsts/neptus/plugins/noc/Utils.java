@@ -32,6 +32,9 @@
  */
 package pt.lsts.neptus.plugins.noc;
 
+import pt.lsts.imc.def.ZUnits;
+import pt.lsts.neptus.mp.Maneuver;
+import pt.lsts.neptus.mp.ManeuverLocation;
 import pt.lsts.neptus.types.coord.CoordinateUtil;
 import pt.lsts.neptus.types.coord.LocationType;
 import pt.lsts.neptus.util.MathMiscUtils;
@@ -99,16 +102,14 @@ public class Utils {
         return days + " " + hmsms;
     }
 
-    public static void main(String[] args) {
-        LocationType loc = LocationType.FEUP;
-        LocationType loc2 = LocationType.ABSOLUTE_ZERO;
+    public static double calculateDuration(ManeuverLocation p1, ManeuverLocation p2, double speed) {
+        if(p1.getZUnits() != p2.getZUnits())
+            return p1.getHorizontalDistanceInMeters(p2);
 
-        System.out.println(loc.getLatitudeAsPrettyString() + " "
-                + loc.getLongitudeAsPrettyString() + " -> " + Utils.locationAsStr(loc));
+        double[] offsets = p1.getOffsetFrom(p2);
+        offsets[2] = Math.abs(p2.getZ() - p1.getZ());
 
-        System.out.println(loc2.getLatitudeAsPrettyString() + " "
-                + loc2.getLongitudeAsPrettyString() + " -> " + Utils.locationAsStr(loc2));
-
-        System.out.println(timeAsStr(System.currentTimeMillis()));
+        double distance = Math.sqrt(offsets[0] * offsets[0] + offsets[1] * offsets[1] + offsets[2] * offsets[2]);
+        return distance / speed;
     }
 }

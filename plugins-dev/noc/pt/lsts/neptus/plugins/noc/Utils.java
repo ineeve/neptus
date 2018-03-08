@@ -41,6 +41,9 @@ import pt.lsts.neptus.util.DateTimeUtil;
 import pt.lsts.neptus.util.MathMiscUtils;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
@@ -91,16 +94,16 @@ public class Utils {
      * days hours:minutes:seconds:millis
      * */
     public static String durationAsStr(long timeMs) {
-        String fullStr = new SimpleDateFormat("d:h:m:s:S").format(new Date(timeMs));
+        double timeSec = timeMs / 1000;
 
-        int daysIndex = fullStr.indexOf(":");
+        long dy = (long) (timeSec/60.0/60.0/24.0);
+        long hr = (long) ((timeSec/60.0/60.0)%24);
+        long mi = (long) ((timeSec/60.0)%60.0);
+        long sec = (long) (timeSec%60);
+        long ms = (timeMs % 1000);
 
-        // hh:ss:ms
-        String hmsms = fullStr.substring( daysIndex + 1, fullStr.length());
 
-        // just days
-        String days = fullStr.substring(0, fullStr.indexOf(":"));
-        return days + " " + hmsms;
+        return dy + " " + hr + ":" + mi + ":" + sec + ":" + ms;
     }
 
     public static long calculateDurationMillis(ManeuverLocation p1, ManeuverLocation p2, double speed) {
@@ -116,6 +119,18 @@ public class Utils {
             duration = (distance / speed) * 1000;
         }
 
-        return (long) MathMiscUtils.round(duration, 3);
+        return (long) MathMiscUtils.round(duration, 0);
+    }
+
+    public static void main(String[] args) {
+        ManeuverLocation l1 = new ManeuverLocation(LocationType.FEUP);
+        l1.setOffsetNorth(20);
+
+        ManeuverLocation l2 = new ManeuverLocation(LocationType.FEUP);
+
+        System.out.println(calculateDurationMillis(l2, l1, 1));
+        System.out.println(durationAsStr(calculateDurationMillis(l2, l1, 1)));
+
+        System.out.println(durationAsStr(2051));
     }
 }

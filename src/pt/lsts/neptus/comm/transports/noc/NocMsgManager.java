@@ -53,10 +53,12 @@ public class NocMsgManager implements MessageListener<MessageInfo, NocMessage> {
     //private NocTcpTransport tcpTransport = null;
 
     private final HashMap<String, HashMap<Object, Method>> callbacks = new HashMap<>();
+    private NocMessageDefinition nocDefinition;
 
-    private NocMsgManager() {
+    private NocMsgManager(NocMessageDefinition nocDefinition) {
         //tcpTransport = new NocTcpTransport(6002);
         //tcpTransport.addListener(this);
+        this.nocDefinition = nocDefinition;
     }
 
     @Override
@@ -101,7 +103,7 @@ public class NocMsgManager implements MessageListener<MessageInfo, NocMessage> {
 
     public static NocMsgManager getManager() {
         if (manager == null)
-            manager = new NocMsgManager();
+            manager = new NocMsgManager(NocMessageDefinition.getInstance());
 
         return manager;
     }

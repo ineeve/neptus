@@ -67,9 +67,15 @@ public class NocTcpTransport {
 
     final HashMap<String, TCPMessageProcessor> listProc = new HashMap<>();
 
-    public NocTcpTransport(int bindPort, NocMessageDefinition nocDefinition) {
+    public NocTcpTransport(NocMessageDefinition nocDefinition) {
         this.nocDefinition = nocDefinition;
+        getTcpTransport();
+        setTCPListener();
+    }
+
+    public NocTcpTransport(int bindPort, NocMessageDefinition nocDefinition) {
         this.bindPort = bindPort;
+        this.nocDefinition = nocDefinition;
         getTcpTransport();
         setTCPListener();
     }
@@ -159,25 +165,13 @@ public class NocTcpTransport {
 
     /**
      * @param destination
-     * @param port
-     * @param message
-     */
-    public boolean sendMessage(String destination, int port, NocMessage message) {
-        return sendMessage(destination, port, message, null);
-    }
-
-
-    /**
-     * @param destination
-     * @param port
      * @param message
      * @param deliveryListener
      */
-    public boolean sendMessage(String destination, int port, final NocMessage message,
+    public boolean sendMessage(String destination, final NocMessage message,
                                final NocMessageDeliveryListener deliveryListener) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            @SuppressWarnings("unused")
             int size = message.serialize(baos);
             DeliveryListener listener = null;
             if (deliveryListener != null) {
@@ -202,8 +196,8 @@ public class NocTcpTransport {
                     }
                 };
             }
-            // FIXME should be server
-            boolean ret = getTcpTransport().sendMessage(destination, port,
+
+            boolean ret = getTcpTransport().sendMessage(destination,
                     baos.toByteArray(), listener);
             if (!ret) {
                 if (deliveryListener != null) {
@@ -310,6 +304,7 @@ public class NocTcpTransport {
                     try {
                         //IMCInputStream iis = new IMCInputStream(pis);
 
+                        NeptusLog.pub().debug("New data");
                         while(!isInputClosed && pis.available() >= 0) { // the pis.available() not always when return '0' means end of stream
 
                             if (pis.available() == 0) {
@@ -424,112 +419,15 @@ public class NocTcpTransport {
 
     @SuppressWarnings("unused")
     public static void main(String[] args) throws Exception {
-//        ConfigFetch.initialize();
-//
-//        String server = "127.0.0.1";
-//        int portServer = 6001;
-//        String server2 = "127.0.0.1";
-//        int portServer2 = 6002;
-//
-//        ImcTcpTransport tcpT = new ImcTcpTransport(portServer, IMCDefinition.getInstance());
-//        ImcTcpTransport tcpT2 = new ImcTcpTransport(portServer2, IMCDefinition.getInstance());
-//
-//        tcpT.addListener(new MessageListener<MessageInfo, IMCMessage>() {
-//            @Override
-//            public void onMessage(MessageInfo info, IMCMessage msg) {
-//                info.dump(System.out);
-//                msg.dump(System.out);
-//            }
-//        });
-//        tcpT2.addListener(new MessageListener<MessageInfo, IMCMessage>() {
-//            @Override
-//            public void onMessage(MessageInfo info, IMCMessage msg) {
-//                info.dump(System.err);
-//                msg.dump(System.err);
-//            }
-//        });
-//
-//        NocMessageDeliveryListener mdlT = new NocMessageDeliveryListener() {
-//            @Override
-//            public void deliveryUnreacheable(IMCMessage message) {
-//                NeptusLog.pub().info("<###>>>> deliveryUnreacheable: "+ message.getAbbrev());
-//            }
-//            @Override
-//            public void deliveryTimeOut(IMCMessage message) {
-//                NeptusLog.pub().info("<###>>>> deliveryTimeOut: "+ message.getAbbrev());
-//            }
-//            @Override
-//            public void deliverySuccess(IMCMessage message) {
-//                NeptusLog.pub().info("<###>>>> deliverySuccess: "+ message.getAbbrev());
-//            }
-//            @Override
-//            public void deliveryError(IMCMessage message, Object error) {
-//                NeptusLog.pub().info("<###>>>> deliveryError: "+ message.getAbbrev() + " " + error);
-//            }
-//            @Override
-//            public void deliveryUncertain(IMCMessage message, Object msg) {
-//                NeptusLog.pub().info("<###>>>> deliveryUncertain: "+ message.getAbbrev() + " " + msg);
-//            }
-//        };
-//        NocMessageDeliveryListener mdlT2 = new NocMessageDeliveryListener() {
-//            @Override
-//            public void deliveryUnreacheable(IMCMessage message) {
-//                System.err.println(">>> deliveryUnreacheable: "+ message.getAbbrev());
-//            }
-//            @Override
-//            public void deliveryTimeOut(IMCMessage message) {
-//                System.err.println(">>> deliveryTimeOut: "+ message.getAbbrev());
-//            }
-//            @Override
-//            public void deliverySuccess(IMCMessage message) {
-//                System.err.println(">>> deliverySuccess: "+ message.getAbbrev());
-//            }
-//            @Override
-//            public void deliveryError(IMCMessage message, Object error) {
-//                System.err.println(">>> deliveryError: "+ message.getAbbrev() + " " + error);
-//            }
-//            @Override
-//            public void deliveryUncertain(IMCMessage message, Object msg) {
-//                System.err.println(">>> deliveryUncertain: "+ message.getAbbrev() + " " + msg);
-//            }
-//        };
-//
-//
-//        IMCMessage msg=null;
-//        IMCMessage msgES=null;
-//        try {
-//            msg = IMCDefinition.getInstance().create("Abort");
-//            msgES = IMCDefinition.getInstance().create("EstimatedState");
-//        }
-//        catch (Exception e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//
-//        msg.getHeader().setValue("src", 0x3c22);
-//        msgES.getHeader().setValue("src", 0x0015);
+        NocTcpTransport nocTcp = new NocTcpTransport(NocMessageDefinition.getInstance());
+        Thread.sleep(5000);
 
-//        try { Thread.sleep(10000); } catch (InterruptedException e1) { }
-//
-//        try { Thread.sleep(5000); } catch (InterruptedException e1) { }
-//        tcpT.sendMessage(server2, portServer2, msg, mdlT);
-//        try { Thread.sleep(5000); } catch (InterruptedException e1) { }
-//        tcpT.sendMessage(server2, portServer2, msg, mdlT);
-//
-//        try { Thread.sleep(5000); } catch (InterruptedException e1) { }
-//        tcpT2.sendMessage(server, portServer, msgES, mdlT2);
-//        try { Thread.sleep(5000); } catch (InterruptedException e1) { }
-//        tcpT2.sendMessage(server, portServer, msgES, mdlT2);
-//
-//        try { Thread.sleep(5000); } catch (InterruptedException e1) { }
-//        tcpT.sendMessage(server2, portServer2, msg, mdlT);
-//        tcpT2.sendMessage(server, portServer, msgES, mdlT2);
-//        tcpT.sendMessage(server2, portServer2, msg, mdlT);
-//
-//        try { Thread.sleep(5000); } catch (InterruptedException e1) { }
-//        tcpT2.stop();
-//
-//        try { Thread.sleep(5000); } catch (InterruptedException e1) { }
-//        tcpT.sendMessage(server2, portServer2, msg, mdlT);
+        NocAbort abort = new NocAbort();
+        boolean ret = nocTcp.sendMessage("127.0.0.1", abort, new NocMessageDeliveryListener(10000));
+
+        if (!ret)
+            NeptusLog.pub().error("Failed to send NocAbort");
+
+        while (nocTcp.isRunning()) {}
     }
 }

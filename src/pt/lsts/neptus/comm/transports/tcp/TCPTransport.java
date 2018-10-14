@@ -46,12 +46,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -824,6 +819,47 @@ public class TCPTransport {
 	    }
 	    return senderThread;
 	}
+
+	/**
+	 * Send message to the given client
+     * @param destination A valid client hostname
+     * @param buffer Data to send
+     * @param listener Connection listener for callbacks
+     * @return if message was queued to be sent
+	 * */
+	public boolean sendMessage(String destination, byte[] buffer, DeliveryListener listener) {
+        if (purging) {
+            String txt = "Not accepting any more messages.";
+            NeptusLog.pub().error(txt);
+            if (listener != null)
+                listener.deliveryResult(ResultEnum.UnFinished, new IOException(txt));
+            return false;
+        }
+
+		synchronized (clients) {
+			Optional<SocketChannel> destClient = clients.stream().filter(client -> {
+				try {
+				    // TODO Should it be like this?
+					return client.getLocalAddress().toString().contains(destination);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return false;
+				}
+			}).findFirst();
+
+			if (!destClient.isPresent())
+				return false;
+
+			SocketChannel clientChannel = destClient.get();
+			TCPNotification req = new TCPNotification(TCPNotification.SEND,
+                    new InetSocketAddress(clientChannel.socket().getInetAddress(), clientChannel.socket().getPort()),
+                    buffer);
+
+            req.setDeliveryListener(listener);
+            sendmessageList.add(req);
+        }
+		return true;
+	}
 	
    /**
      * Sends a message to the network
@@ -846,7 +882,7 @@ public class TCPTransport {
      * @return true meaning that the message was put on the send queue, and 
      *          false if it was not put on the send queue.
      */
-    public boolean sendMessage(String destination, int port, byte[] buffer, 
+    public boolean sendMessage(String destination, int port, byte[] buffer,
             DeliveryListener deliveryListener) {
         if (purging) {
             String txt = "Not accepting any more messages. IMCMessenger is terminating";

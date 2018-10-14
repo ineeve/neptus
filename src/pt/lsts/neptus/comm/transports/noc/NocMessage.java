@@ -38,6 +38,8 @@ import pt.lsts.neptus.messages.IMessageProtocol;
 import pt.lsts.neptus.messages.InvalidFieldException;
 import pt.lsts.neptus.messages.InvalidMessageException;
 
+import java.io.OutputStream;
+
 /**
  * Base class for noc messages
  *
@@ -130,4 +132,12 @@ public abstract class NocMessage implements IMessage {
     public double getTimestamp() {
         return 0;
     }
+
+    public int serialize(OutputStream os) throws Exception {
+        int nbytes = 0;
+        NocMessageDefinition.getInstance().serialize(this, os);
+
+        return nbytes;
+    }
+
 }

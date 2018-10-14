@@ -34,10 +34,7 @@
  */
 package pt.lsts.neptus.comm.transports.noc;
 
-import pt.lsts.imc.IMCMessage;
-import pt.lsts.imc.IMCOutputStream;
 import pt.lsts.neptus.NeptusLog;
-import pt.lsts.neptus.comm.manager.imc.MessageDeliveryListener;
 import pt.lsts.neptus.comm.transports.DeliveryListener;
 import pt.lsts.neptus.comm.transports.DeliveryListener.ResultEnum;
 import pt.lsts.neptus.comm.transports.tcp.TCPMessageListener;
@@ -151,7 +148,7 @@ public class NocTcpTransport {
      * @return
      */
     public boolean removeListener(
-            MessageListener<MessageInfo, IMCMessage> listener) {
+            MessageListener<MessageInfo, NocMessage> listener) {
         boolean ret;
         synchronized (listeners) {
             ret = listeners.remove(listener);
@@ -165,7 +162,7 @@ public class NocTcpTransport {
      * @param port
      * @param message
      */
-    public boolean sendMessage(String destination, int port, IMCMessage message) {
+    public boolean sendMessage(String destination, int port, NocMessage message) {
         return sendMessage(destination, port, message, null);
     }
 
@@ -176,13 +173,12 @@ public class NocTcpTransport {
      * @param message
      * @param deliveryListener
      */
-    public boolean sendMessage(String destination, int port, final IMCMessage message,
-                               final MessageDeliveryListener deliveryListener) {
+    public boolean sendMessage(String destination, int port, final NocMessage message,
+                               final NocMessageDeliveryListener deliveryListener) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IMCOutputStream imcOs = new IMCOutputStream(baos);
         try {
             @SuppressWarnings("unused")
-            int size = message.serialize(imcOs);
+            int size = message.serialize(baos);
             DeliveryListener listener = null;
             if (deliveryListener != null) {
                 listener = (result, error) -> {
@@ -453,7 +449,7 @@ public class NocTcpTransport {
 //            }
 //        });
 //
-//        MessageDeliveryListener mdlT = new MessageDeliveryListener() {
+//        NocMessageDeliveryListener mdlT = new NocMessageDeliveryListener() {
 //            @Override
 //            public void deliveryUnreacheable(IMCMessage message) {
 //                NeptusLog.pub().info("<###>>>> deliveryUnreacheable: "+ message.getAbbrev());
@@ -475,7 +471,7 @@ public class NocTcpTransport {
 //                NeptusLog.pub().info("<###>>>> deliveryUncertain: "+ message.getAbbrev() + " " + msg);
 //            }
 //        };
-//        MessageDeliveryListener mdlT2 = new MessageDeliveryListener() {
+//        NocMessageDeliveryListener mdlT2 = new NocMessageDeliveryListener() {
 //            @Override
 //            public void deliveryUnreacheable(IMCMessage message) {
 //                System.err.println(">>> deliveryUnreacheable: "+ message.getAbbrev());

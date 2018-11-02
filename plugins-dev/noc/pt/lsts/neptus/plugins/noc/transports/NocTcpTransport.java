@@ -138,11 +138,10 @@ public class NocTcpTransport {
 
 
     /**
-     * @param destination
      * @param message
      * @param deliveryListener
      */
-    public boolean sendMessage(String destination, final NocMessage message,
+    public boolean sendMessage(final NocMessage message,
                                final NocMessageDeliveryListener deliveryListener) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -171,8 +170,7 @@ public class NocTcpTransport {
                 };
             }
 
-            boolean ret = getTcpTransport().sendMessage(destination,
-                    baos.toByteArray(), listener);
+            boolean ret = getTcpTransport().sendMessage(baos.toByteArray(), listener);
             if (!ret) {
                 if (deliveryListener != null) {
                     deliveryListener.deliveryError(message, new Exception("Delivery "
@@ -346,7 +344,7 @@ public class NocTcpTransport {
         Thread.sleep(5000);
 
         NocAbort abort = new NocAbort();
-        boolean ret = nocTcp.sendMessage("127.0.0.1", abort, new NocMessageDeliveryListener(10000));
+        boolean ret = nocTcp.sendMessage(abort, new NocMessageDeliveryListener(10000));
 
         if (!ret)
             NeptusLog.pub().error("Failed to send NocAbort");

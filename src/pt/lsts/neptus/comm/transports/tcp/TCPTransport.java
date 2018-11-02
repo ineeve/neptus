@@ -821,13 +821,12 @@ public class TCPTransport {
 	}
 
 	/**
-	 * Send message to the given client
-     * @param destination A valid client hostname
+	 * Send message to known clients
      * @param buffer Data to send
      * @param listener Connection listener for callbacks
      * @return if message was queued to be sent
 	 * */
-	public boolean sendMessage(String destination, byte[] buffer, DeliveryListener listener) {
+	public boolean sendMessage(byte[] buffer, DeliveryListener listener) {
         if (purging) {
             String txt = "Not accepting any more messages.";
             NeptusLog.pub().error(txt);
@@ -837,26 +836,14 @@ public class TCPTransport {
         }
 
 		synchronized (clients) {
-			Optional<SocketChannel> destClient = clients.stream().filter(client -> {
-				try {
-				    // TODO Should it be like this?
-					return client.getLocalAddress().toString().contains(destination);
-				} catch (IOException e) {
-					e.printStackTrace();
-					return false;
-				}
-			}).findFirst();
+        	clients.forEach(client -> {
+				TCPNotification req = new TCPNotification(TCPNotification.SEND,
+						new InetSocketAddress(client.socket().getInetAddress(), client.socket().getPort()),
+						buffer);
 
-			if (!destClient.isPresent())
-				return false;
-
-			SocketChannel clientChannel = destClient.get();
-			TCPNotification req = new TCPNotification(TCPNotification.SEND,
-                    new InetSocketAddress(clientChannel.socket().getInetAddress(), clientChannel.socket().getPort()),
-                    buffer);
-
-            req.setDeliveryListener(listener);
-            sendmessageList.add(req);
+				req.setDeliveryListener(listener);
+				sendmessageList.add(req);
+			});
         }
 		return true;
 	}

@@ -34,9 +34,9 @@
 package pt.lsts.neptus.plugins.noc.transports;
 
 import com.google.common.eventbus.Subscribe;
-import pt.lsts.neptus.NeptusLog;
 import pt.lsts.neptus.console.ConsoleLayout;
 import pt.lsts.neptus.console.ConsolePanel;
+import pt.lsts.neptus.plugins.NeptusProperty;
 import pt.lsts.neptus.plugins.PluginDescription;
 import pt.lsts.neptus.plugins.noc.transports.messages.NocMessage;
 import pt.lsts.neptus.plugins.noc.transports.messages.NocMessageDefinition;
@@ -44,6 +44,9 @@ import pt.lsts.neptus.plugins.noc.transports.messages.NocMessageDefinition;
 
 @PluginDescription(name = "NOC Message Manager")
 public class NocMsgManager extends ConsolePanel implements NocMessageListener{
+    @NeptusProperty(name = "Communications timeout (Milliseconds)", description = "When sending a message use this value as a timeout")
+    public int timeoutMillis = 1000;
+
     private final NocMessageDefinition nocDefinition = NocMessageDefinition.getInstance();
     private final NocTcpTransport tcpTransport = new NocTcpTransport(nocDefinition);
 
@@ -55,7 +58,7 @@ public class NocMsgManager extends ConsolePanel implements NocMessageListener{
     @Subscribe
     public void consume(NocMessage msg) {
         // TODO catch all NocMessages on the bus and (perhaps) send them to the network
-        NeptusLog.pub().info("Got a NocMessage " + msg.getClass().getName());
+        tcpTransport.sendMessage(msg, new NocMessageDeliveryListener(timeoutMillis));
     }
 
     @Override

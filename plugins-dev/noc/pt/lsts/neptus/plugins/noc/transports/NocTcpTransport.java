@@ -76,40 +76,11 @@ public class NocTcpTransport {
         setTCPListener();
     }
 
-    public NocTcpTransport(int bindPort, NocMessageDefinition nocDefinition) {
-        this.bindPort = bindPort;
-        this.nocDefinition = nocDefinition;
-        getTcpTransport();
-        setTCPListener();
-    }
-
-    /**
-     * @return the bindPort
-     */
-    public int getBindPort() {
-        return bindPort;
-    }
-
-    /**
-     * @param bindPort the bindPort to set
-     */
-    public void setBindPort(int bindPort) {
-        this.bindPort = bindPort;
-        getTcpTransport().setBindPort(bindPort);
-    }
-
     /**
      * @return
      */
     public boolean isRunning() {
         return getTcpTransport().isRunning();
-    }
-
-    /**
-     * @return
-     */
-    public boolean isRunningNormally() {
-        return getTcpTransport().isRunningNormally();
     }
 
     /**
@@ -227,14 +198,6 @@ public class NocTcpTransport {
     }
 
     /**
-     *
-     */
-    public void purge() {
-        getTcpTransport().purge();
-        stopAndCleanReceiveProcessors();
-    }
-
-    /**
      * Call only after stop or purge.
      */
     private void stopAndCleanReceiveProcessors() {
@@ -242,28 +205,6 @@ public class NocTcpTransport {
             proc.cleanup();
         }
         listProc.clear();
-    }
-
-    public void reStart() {
-        getTcpTransport().reStart();
-    }
-
-    /**
-     *
-     */
-    public boolean isOnBindError() {
-        return getTcpTransport().isOnBindError();
-    }
-
-    /**
-     * @return
-     */
-    public long getActiveNumberOfConnections() {
-        return getTcpTransport().getActiveNumberOfConnections();
-    }
-
-    public boolean isConnectionEstablished(String host, int port) {
-        return getTcpTransport().isConnectionEstablished(host, port);
     }
 
     /**
@@ -285,9 +226,6 @@ public class NocTcpTransport {
         LinkedHashSet<NocMessageListener> listeners;
         NocMessageDefinition nocDefinition;
 
-        /**
-         *
-         */
         public TCPMessageProcessor(String id, LinkedHashSet<NocMessageListener> listeners,
                                    NocMessageDefinition nocDefinition) {
             this.nocDefinition = nocDefinition;
@@ -305,8 +243,6 @@ public class NocTcpTransport {
                 @Override
                 public void run() {
                     try {
-                        //IMCInputStream iis = new IMCInputStream(pis);
-
                         NeptusLog.pub().debug("New data");
                         while(!isInputClosed && pis.available() >= 0) { // the pis.available() not always when return '0' means end of stream
 
@@ -322,11 +258,6 @@ public class NocTcpTransport {
                             catch (IOException e) {
                                 
                             }
-//                            byte[] ba = new byte[pis.available()];
-//                            if (ba.length > 0) {
-//                                pis.read(ba);
-//                                ByteUtil.dumpAsHex(ba, System.out);
-//                            }
                         }
                     }
                     catch (IOException e) {
@@ -344,13 +275,8 @@ public class NocTcpTransport {
             return id;
         }
 
-        /* (non-Javadoc)
-         * @see pt.lsts.neptus.util.comm.transports.tcp.TCPMessageListener#onTCPMessageNotification(pt.lsts.neptus.util.comm.transports.tcp.TCPNotification)
-         */
         @Override
         public void onTCPMessageNotification(TCPNotification req) {
-            //    NeptusLog.pub().info("<###>ssssssssssssssssssss "+req.getTimeMillis());
-//	        ByteUtil.dumpAsHex(req.getAddress()+"", req.getBuffer(), System.out);
             host = req.getAddress().getAddress().getHostAddress();
             port = req.getAddress().getPort();
 
@@ -383,13 +309,7 @@ public class NocTcpTransport {
             isInputClosed = true;
         }
 
-        //	    /* (non-Javadoc)
-//	     * @see pt.lsts.neptus.util.lsf.gz.GzLsf2Llf.MessageListener#msgArrived(long, pt.lsts.neptus.imc.IMCMessage)
-//	     */
-//	    @Override
         public void msgArrived(/*long timeStampMillis,*/ NocMessage msg) {
-            //msg.dump(System.out);
-
             MessageInfo info = new MessageInfoImpl();
             info.setPublisher(host);
             info.setPublisherInetAddress(host);

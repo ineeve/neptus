@@ -1,4 +1,4 @@
-package pt.lsts.neptus.comm.transports.noc;
+package pt.lsts.neptus.plugins.noc.transports.messages;
 
 public class NocAbort extends NocMessage {
     public String value;

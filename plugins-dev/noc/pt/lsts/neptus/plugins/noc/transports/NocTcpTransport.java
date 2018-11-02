@@ -32,7 +32,7 @@
  * 2011/01/17
  * 2018/10/12
  */
-package pt.lsts.neptus.comm.transports.noc;
+package pt.lsts.neptus.plugins.noc.transports;
 
 import pt.lsts.neptus.NeptusLog;
 import pt.lsts.neptus.comm.transports.DeliveryListener;
@@ -43,6 +43,9 @@ import pt.lsts.neptus.comm.transports.tcp.TCPTransport;
 import pt.lsts.neptus.messages.listener.MessageInfo;
 import pt.lsts.neptus.messages.listener.MessageInfoImpl;
 import pt.lsts.neptus.messages.listener.MessageListener;
+import pt.lsts.neptus.plugins.noc.transports.messages.NocAbort;
+import pt.lsts.neptus.plugins.noc.transports.messages.NocMessage;
+import pt.lsts.neptus.plugins.noc.transports.messages.NocMessageDefinition;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

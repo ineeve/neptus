@@ -1,6 +1,7 @@
-package pt.lsts.neptus.comm.transports.noc;
+package pt.lsts.neptus.plugins.noc.transports;
 
 import pt.lsts.neptus.comm.transports.DeliveryListener;
+import pt.lsts.neptus.plugins.noc.transports.messages.NocMessage;
 
 import java.util.concurrent.Callable;
 

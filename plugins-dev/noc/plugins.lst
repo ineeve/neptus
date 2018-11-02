@@ -1,1 +1,2 @@
 pt.lsts.neptus.plugins.noc.exporter.Autosub6000PlanExporter
+pt.lsts.neptus.plugins.noc.transports.NocMsgManager

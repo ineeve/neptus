@@ -31,113 +31,91 @@
  * Author.
  * 2018/10/12
  */
-package pt.lsts.neptus.comm.transports.noc;
+package pt.lsts.neptus.plugins.noc.transports.messages;
 
-import pt.lsts.neptus.messages.IMessage;
 import pt.lsts.neptus.messages.IMessageProtocol;
-import pt.lsts.neptus.messages.InvalidFieldException;
-import pt.lsts.neptus.messages.InvalidMessageException;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 
 /**
- * Base class for noc messages
+ * This class handles serialization and deserialization of
+ * {@link NocMessage}
  *
- * TODO-NOC implement
+ * @see pt.lsts.imc.IMCDefinition
+ * TODO-NOC imlement
  * */
-public abstract class NocMessage implements IMessage {
-    String value;
+public class NocMessageDefinition implements IMessageProtocol<NocMessage> {
+    private static NocMessageDefinition def;
+
+
+    public static NocMessageDefinition getInstance() {
+        if (def == null) {
+            def = new NocMessageDefinition();
+        }
+
+        return def;
+    }
 
     @Override
-    public int getMgid() {
+    public String name() {
+        return null;
+    }
+
+    @Override
+    public String version() {
+        return null;
+    }
+
+    @Override
+    public int serializationSize(NocMessage msg) {
         return 0;
     }
 
     @Override
-    public String getAbbrev() {
+    public void serialize(NocMessage m, OutputStream os) throws Exception {
+
+    }
+
+    @Override
+    public NocMessage unserialize(InputStream is) throws Exception {
         return null;
     }
 
     @Override
-    public String getLongName() {
+    public NocMessage newMessage(int id) throws Exception {
         return null;
     }
 
     @Override
-    public String[] getFieldNames() {
-        return new String[0];
-    }
-
-    @Override
-    public void validate() throws InvalidMessageException {
-
-    }
-
-    @Override
-    public Object getValue(String fieldName) {
+    public NocMessage newMessage(String name) throws Exception {
         return null;
     }
 
     @Override
-    public String getAsString(String fieldName) {
+    public Collection<String> getMessageNames() {
         return null;
     }
 
     @Override
-    public Number getAsNumber(String fieldName) {
+    public int getMessageCount() {
+        return 0;
+    }
+
+    @Override
+    public String getMessageName(int id) throws Exception {
         return null;
     }
 
     @Override
-    public String getTypeOf(String fieldName) {
-        return null;
-    }
-
-    @Override
-    public String getUnitsOf(String fieldName) {
-        return null;
-    }
-
-    @Override
-    public boolean hasFlag(String flagName) {
-        return false;
-    }
-
-    @Override
-    public String getLongFieldName(String fieldName) {
-        return null;
-    }
-
-    @Override
-    public void setValue(String fieldName, Object value) throws InvalidFieldException {
-
-    }
-
-    @Override
-    public IMessageProtocol<? extends IMessage> getProtocolFactory() {
-        return null;
-    }
-
-    @Override
-    public <M extends IMessage> M cloneMessage() {
-        return null;
-    }
-
-    @Override
-    public Object getHeaderValue(String field) {
-        return null;
+    public int getMessageId(String name) throws Exception {
+        return 0;
     }
 
     // TODO-NOC implement
-    public double getTimestamp() {
-        return 0;
+    public NocMessage nextMessage(InputStream in) throws IOException {
+        return null;
     }
-
-    public int serialize(OutputStream os) throws Exception {
-        int nbytes = 0;
-        NocMessageDefinition.getInstance().serialize(this, os);
-
-        return nbytes;
-    }
-
 }

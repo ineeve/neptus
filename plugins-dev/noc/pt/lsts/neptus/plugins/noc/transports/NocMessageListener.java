@@ -27,49 +27,14 @@
  *
  * For more information please see <http://lsts.fe.up.pt/neptus>.
  *
- * Author: Tiago Sá Marques (first implementation)
+ * Author: Tiago Sá Marques
  * Author.
- * 2018/10/12
+ * 2018/11/02
  */
 package pt.lsts.neptus.plugins.noc.transports;
 
-import com.google.common.eventbus.Subscribe;
-import pt.lsts.neptus.NeptusLog;
-import pt.lsts.neptus.console.ConsoleLayout;
-import pt.lsts.neptus.console.ConsolePanel;
-import pt.lsts.neptus.plugins.PluginDescription;
 import pt.lsts.neptus.plugins.noc.transports.messages.NocMessage;
-import pt.lsts.neptus.plugins.noc.transports.messages.NocMessageDefinition;
 
-
-@PluginDescription(name = "NOC Message Manager")
-public class NocMsgManager extends ConsolePanel implements NocMessageListener{
-    private final NocMessageDefinition nocDefinition = NocMessageDefinition.getInstance();
-    private final NocTcpTransport tcpTransport = new NocTcpTransport(nocDefinition);
-
-    public NocMsgManager(ConsoleLayout console) {
-        super(console);
-        tcpTransport.addListener(this);
-    }
-
-    @Subscribe
-    public void consume(NocMessage msg) {
-        // TODO catch all NocMessages on the bus and (perhaps) send them to the network
-        NeptusLog.pub().info("Got a NocMessage " + msg.getClass().getName());
-    }
-
-    @Override
-    public void cleanSubPanel() {
-
-    }
-
-    @Override
-    public void initSubPanel() {
-
-    }
-
-    @Override
-    public void onMessage(NocMessage msg) {
-        post(msg);
-    }
+public interface NocMessageListener {
+    public void onMessage(NocMessage msg);
 }

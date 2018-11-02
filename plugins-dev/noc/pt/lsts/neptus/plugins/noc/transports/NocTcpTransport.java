@@ -61,7 +61,7 @@ import java.util.LinkedHashSet;
  */
 public class NocTcpTransport {
 
-    private LinkedHashSet<MessageListener<MessageInfo, NocMessage>> listeners = new LinkedHashSet<>();
+    private LinkedHashSet<NocMessageListener> listeners = new LinkedHashSet<>();
     private NocMessageDefinition nocDefinition;
 
     private TCPTransport tcpTransport = null;
@@ -144,7 +144,7 @@ public class NocTcpTransport {
      * @param listener
      * @return
      */
-    public boolean addListener(MessageListener<MessageInfo, NocMessage> listener) {
+    public boolean addListener(NocMessageListener listener) {
         boolean ret = false;
         synchronized (listeners) {
             ret = listeners.add(listener);
@@ -282,13 +282,13 @@ public class NocTcpTransport {
         String host = "";
         int port = 0;
 
-        LinkedHashSet<MessageListener<MessageInfo, NocMessage>> listeners;
+        LinkedHashSet<NocMessageListener> listeners;
         NocMessageDefinition nocDefinition;
 
         /**
          *
          */
-        public TCPMessageProcessor(String id, LinkedHashSet<MessageListener<MessageInfo, NocMessage>> listeners,
+        public TCPMessageProcessor(String id, LinkedHashSet<NocMessageListener> listeners,
                                    NocMessageDefinition nocDefinition) {
             this.nocDefinition = nocDefinition;
             this.id = id;
@@ -400,9 +400,9 @@ public class NocTcpTransport {
             info.setTimeSentNanos((long)msg.getTimestamp() * (long)1E9);
             info.setProperty(MessageInfo.TRANSPORT_MSG_KEY, "TCP");
 
-            for (MessageListener<MessageInfo, NocMessage> lst : listeners) {
+            for (NocMessageListener lst : listeners) {
                 try {
-                    lst.onMessage(info , msg);
+                    lst.onMessage(msg);
                 }
                 catch (Exception e) {
                     NeptusLog.pub().error(e);

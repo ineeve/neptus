@@ -127,8 +127,7 @@ public class NocTcpTransport {
      * @param listener
      * @return
      */
-    public boolean removeListener(
-            MessageListener<MessageInfo, NocMessage> listener) {
+    public boolean removeListener(NocMessageListener listener) {
         boolean ret;
         synchronized (listeners) {
             ret = listeners.remove(listener);
@@ -307,15 +306,14 @@ public class NocTcpTransport {
             isInputClosed = true;
         }
 
-        public void msgArrived(/*long timeStampMillis,*/ NocMessage msg) {
+        public void msgArrived(NocMessage msg) {
+            // TODO do we really need MesageInfo for NOC?
             MessageInfo info = new MessageInfoImpl();
             info.setPublisher(host);
             info.setPublisherInetAddress(host);
             info.setPublisherPort(port);
-            //FIXME time here is in milliseconds and MiddlewareMessageInfo is in nanoseconds
-//            info.setTimeReceivedNanos(req.getTimeMillis() * (long)1E6);
             info.setTimeReceivedNanos(System.currentTimeMillis() * (long)1E6);
-            info.setTimeSentNanos((long)msg.getTimestamp() * (long)1E9);
+            info.setTimeSentNanos(msg.getTimestamp() * (long)1E9);
             info.setProperty(MessageInfo.TRANSPORT_MSG_KEY, "TCP");
 
             for (NocMessageListener lst : listeners) {

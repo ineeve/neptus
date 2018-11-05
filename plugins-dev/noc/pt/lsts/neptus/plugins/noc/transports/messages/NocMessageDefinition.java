@@ -33,12 +33,9 @@
  */
 package pt.lsts.neptus.plugins.noc.transports.messages;
 
-import pt.lsts.neptus.messages.IMessageProtocol;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
 
 /**
  * This class handles serialization and deserialization of
@@ -47,7 +44,7 @@ import java.util.Collection;
  * @see pt.lsts.imc.IMCDefinition
  * TODO-NOC imlement
  * */
-public class NocMessageDefinition implements IMessageProtocol<NocMessage> {
+public class NocMessageDefinition {
     private static NocMessageDefinition def;
 
 
@@ -59,63 +56,20 @@ public class NocMessageDefinition implements IMessageProtocol<NocMessage> {
         return def;
     }
 
-    @Override
-    public String name() {
+    // TODO-NOC implement
+    // Serialize the given NocMessage
+    public void serialize(NocMessage m, OutputStream os) throws IOException {
+
+    }
+
+    // TODO-NOC implement
+    // Read data from the given InputStream and try to deserialize a NocMessage
+    public NocMessage deserialize(InputStream is) throws IOException {
         return null;
-    }
-
-    @Override
-    public String version() {
-        return null;
-    }
-
-    @Override
-    public int serializationSize(NocMessage msg) {
-        return 0;
-    }
-
-    @Override
-    public void serialize(NocMessage m, OutputStream os) throws Exception {
-
-    }
-
-    @Override
-    public NocMessage unserialize(InputStream is) throws Exception {
-        return null;
-    }
-
-    @Override
-    public NocMessage newMessage(int id) throws Exception {
-        return null;
-    }
-
-    @Override
-    public NocMessage newMessage(String name) throws Exception {
-        return null;
-    }
-
-    @Override
-    public Collection<String> getMessageNames() {
-        return null;
-    }
-
-    @Override
-    public int getMessageCount() {
-        return 0;
-    }
-
-    @Override
-    public String getMessageName(int id) throws Exception {
-        return null;
-    }
-
-    @Override
-    public int getMessageId(String name) throws Exception {
-        return 0;
     }
 
     // TODO-NOC implement
     public NocMessage nextMessage(InputStream in) throws IOException {
-        return null;
+        return deserialize(in);
     }
 }

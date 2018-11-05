@@ -33,9 +33,10 @@
  */
 package pt.lsts.neptus.plugins.noc.transports.messages;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.apache.commons.lang.ArrayUtils;
+
+import java.io.*;
+import java.util.ArrayList;
 
 /**
  * This class handles serialization and deserialization of
@@ -59,17 +60,81 @@ public class NocMessageDefinition {
     // TODO-NOC implement
     // Serialize the given NocMessage
     public void serialize(NocMessage m, OutputStream os) throws IOException {
+        if (m instanceof NocAbort) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("$ABORT,")
+                    .append(((NocAbort)m).value);
 
+            os.write(sb.toString().getBytes());
+        }
     }
 
     // TODO-NOC implement
     // Read data from the given InputStream and try to deserialize a NocMessage
     public NocMessage deserialize(InputStream is) throws IOException {
-        return null;
+        ArrayList<Byte> bytesList = new ArrayList<>();
+        int ret = 0;
+        boolean eof = false;
+
+        while(ret != -1 && !eof)
+        {
+            ret = is.read();
+            byte b = (byte)ret;
+            bytesList.add(b);
+
+            if (b == '\n')
+                eof = true;
+        }
+
+        byte[] bytes = ArrayUtils.toPrimitive(bytesList.toArray(new Byte[bytesList.size()]));
+        String messageStr = new String(bytes);
+
+        String[] msgParts = messageStr.split(",");
+
+        NocMessage msg = null;
+
+        if (msgParts[0].equals("$ABORT"))
+        {
+            msg = new NocAbort();
+            ((NocAbort) msg).value = msgParts[1];
+        }
+
+        return msg;
     }
 
     // TODO-NOC implement
     public NocMessage nextMessage(InputStream in) throws IOException {
         return deserialize(in);
+    }
+
+    public static void main(String[] args) throws IOException {
+        NocMessageDefinition nocDef = NocMessageDefinition.getInstance();
+
+        NocAbort msg = new NocAbort();
+        msg.value = "12345";
+
+        NocAbort msg2 = new NocAbort();
+        msg2.value = "yet-another-field";
+
+        OutputStream os = new ByteArrayOutputStream();
+        nocDef.serialize(msg, os);
+        os.write('\n');
+
+        nocDef.serialize(msg2, os);
+        os.write('\n');
+
+        InputStream in = new ByteArrayInputStream(((ByteArrayOutputStream) os).toByteArray());
+
+        NocMessage deserializedMsg = nocDef.deserialize(in);
+        NocMessage deserializedMsg2 = nocDef.deserialize(in);
+
+        assert deserializedMsg instanceof NocAbort;
+        assert ((NocAbort) deserializedMsg).value.equals(msg.value);
+
+        assert deserializedMsg2 instanceof NocAbort;
+        assert ((NocAbort) deserializedMsg2).value.equals(msg.value);
+
+        System.out.println("NocAbort 1: " + ((NocAbort) deserializedMsg).value);
+        System.out.println("NocAbort 2: " + ((NocAbort) deserializedMsg2).value);
     }
 }
